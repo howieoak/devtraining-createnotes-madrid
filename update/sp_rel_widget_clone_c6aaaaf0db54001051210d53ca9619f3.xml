@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_rel_widget_clone">
+    <sp_rel_widget_clone action="INSERT_OR_UPDATE">
+        <child display_value="MyAddWidget">8eaaaaf0db54001051210d53ca9619f0</child>
+        <cloned>2019-10-02 17:35:13</cloned>
+        <last_validated>2019-10-02 17:35:13</last_validated>
+        <parent display_value="Add Widget">32366e885b1112000d7ec7ad31f91a51</parent>
+        <payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;sp_widget&gt;&lt;category&gt;sp_platform&lt;/category&gt;&lt;client_script&gt;&lt;![CDATA[function($location, $rootScope) {
+	var c = this;
+	
+	function format(value) {		
+		return value.toLowerCase()
+			.replace(/[^a-z0-9\-]/gi,'_')
+			.replace(/^-|-$/g, '');		
+	}
+	
+	c.submit = function() {
+		c.server.update().then(function(response) {
+			$rootScope.$broadcast('$sp.widget-close-modal');
+			var s = $location.search();
+			s.sys_id = c.data.sys_id;
+			$location.search(s).replace();
+		});
+	}
+	c.fixID = function(id) {
+		if (!id) return;
+		c.data.id = format(id.toString());
+	}
+	
+	c.fixPageID = function(id) {
+		if (!id) return;
+		c.data.test_page_id = format(id.toString());
+	}
+
+	// Automatically provide an ID that is based on the name of the widget
+	c.updateID = function() {
+		c.data.id = format(c.data.name);		
+		c.data.test_page_id = format(c.data.name);
+	}
+		
+}]]&gt;&lt;/client_script&gt;&lt;controller_as&gt;c&lt;/controller_as&gt;&lt;css&gt;.error {
+  color: #f95050;
+}
+
+.form-control.ng-invalid {
+  border: 1px solid #f95050;
+}&lt;/css&gt;&lt;data_table&gt;sp_instance&lt;/data_table&gt;&lt;demo_data/&gt;&lt;description/&gt;&lt;docs/&gt;&lt;field_list/&gt;&lt;has_preview&gt;false&lt;/has_preview&gt;&lt;id&gt;widget-add-new&lt;/id&gt;&lt;internal&gt;true&lt;/internal&gt;&lt;link/&gt;&lt;name&gt;Add Widget&lt;/name&gt;&lt;option_schema/&gt;&lt;public&gt;false&lt;/public&gt;&lt;roles&gt;sp_admin&lt;/roles&gt;&lt;script&gt;&lt;![CDATA[(function() {
+	
+data.pageIDRequiredMsg = gs.getMessage("Page ID (Required)");
+data.widgetNameRequiredMsg = gs.getMessage("Widget Name (Required)");
+data.widgetIDRequiredMsg = gs.getMessage("Widget ID (Required)");
+
+function saveWidget(input) {
+	var widgetGR = new GlideRecord("sp_widget");
+	widgetGR.addQuery("id", input.id);
+	widgetGR.query();
+	if (widgetGR.next()) {
+		// Error Message
+		return;
+	}
+
+	widgetGR.setValue("id", input.id);
+	widgetGR.setValue("name", input.name);
+	widgetGR.insert();
+
+	if (input.createTestPage) {
+		var pageGR = new GlideRecord("sp_page");
+		pageGR.addQuery("id", input.test_page_id);
+		pageGR.query();
+		if (pageGR.next())
+			return;
+
+		pageGR.setValue("id", input.test_page_id);
+		pageGR.setValue("title", input.name + " - Test Page");
+		pageGR.insert();
+
+		var containerGR = new GlideRecord("sp_container");
+		containerGR.initialize();
+		containerGR.sp_page = pageGR.getUniqueValue();
+		containerGR.insert();
+
+		var rowGR = new GlideRecord("sp_row");
+		rowGR.initialize();
+		rowGR.sp_container = containerGR.getUniqueValue();
+		rowGR.insert();
+
+		var colGR = new GlideRecord("sp_column");
+		colGR.initialize();
+		colGR.sp_row = rowGR.getUniqueValue();
+		colGR.insert();
+
+		var instanceGR = new GlideRecord("sp_instance");
+		instanceGR.initialize();
+		instanceGR.sp_column = colGR.getUniqueValue();
+		instanceGR.sp_widget = widgetGR.getUniqueValue();
+		instanceGR.insert();
+	}
+
+	data.sys_id = widgetGR.getValue("sys_id");
+}
+
+if (input)
+	saveWidget(input);	
+	
+})();]]&gt;&lt;/script&gt;&lt;servicenow&gt;true&lt;/servicenow&gt;&lt;sys_class_name&gt;sp_widget&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2016-01-27 05:05:57&lt;/sys_created_on&gt;&lt;sys_id&gt;32366e885b1112000d7ec7ad31f91a51&lt;/sys_id&gt;&lt;sys_mod_count&gt;103&lt;/sys_mod_count&gt;&lt;sys_name&gt;Add Widget&lt;/sys_name&gt;&lt;sys_package display_value="Service Portal - Core" source="com.glide.service-portal"&gt;5fef9771ddc323007850f2ee37a039e7&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Global"&gt;global&lt;/sys_scope&gt;&lt;sys_update_name&gt;sp_widget_32366e885b1112000d7ec7ad31f91a51&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2017-08-24 18:54:45&lt;/sys_updated_on&gt;&lt;template&gt;&lt;![CDATA[&lt;form name="createWidget" ng-submit="c.submit()"&gt;
+  &lt;div class="form-group"&gt;
+    &lt;input required type="text" class="form-control" ng-change="c.updateID()" ng-required="true" name="name" ng-model="c.data.name" placeholder="{{::data.widgetNameRequiredMsg}}" /&gt;
+  &lt;/div&gt;
+  &lt;div class="form-group"&gt;
+    &lt;input required type="text" class="form-control" ng-blur="c.fixID(c.data.id)" maxlength="40" name="id" ng-model="c.data.id" placeholder="{{::data.widgetIDRequiredMsg}}" /&gt;
+    &lt;div class="m-t-xs"&gt;${Use only lowercase letters, numbers, underscores, and hyphens}&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class="checkbox"&gt;
+    &lt;label&gt;
+      &lt;input ng-model="c.data.createTestPage" type="checkbox" /&gt; ${Create test page}
+    &lt;/label&gt;
+  &lt;/div&gt;  
+  &lt;div ng-if="c.data.createTestPage" class="form-group"&gt;
+    &lt;input required type="text" class="form-control" ng-blur="c.fixPageID(c.data.test_page_id)" maxlength="40" name="test-page-id" ng-model="c.data.test_page_id" placeholder="{{::data.pageIDRequiredMsg}}" /&gt;
+    &lt;div class="m-t-xs"&gt;${Use only lowercase letters, numbers, underscores, and hyphens}&lt;/div&gt;
+  &lt;/div&gt;  
+  &lt;button type="submit" class="btn btn-primary pull-right" ng-class="{'disabled': !createWidget.$valid}"&gt;${Submit}&lt;/button&gt;
+  &lt;div class="clearfix"&gt;&lt;/div&gt;
+&lt;/form&gt;]]&gt;&lt;/template&gt;&lt;/sp_widget&gt;</payload>
+        <sys_class_name>sp_rel_widget_clone</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2019-10-02 17:35:13</sys_created_on>
+        <sys_id>c6aaaaf0db54001051210d53ca9619f3</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>8eaaaaf0db54001051210d53ca9619f0</sys_name>
+        <sys_package display_value="CreateNotes" source="x_snc_createnotes">df5fd9a5090232007f44e1046c8ff69f</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="CreateNotes">df5fd9a5090232007f44e1046c8ff69f</sys_scope>
+        <sys_update_name>sp_rel_widget_clone_c6aaaaf0db54001051210d53ca9619f3</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2019-10-02 17:35:13</sys_updated_on>
+    </sp_rel_widget_clone>
+</record_update>
